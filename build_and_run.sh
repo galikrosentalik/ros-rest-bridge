@@ -1,2 +1,2 @@
-docker build -t my-rest-api-image .
-docker run --network="host" my-rest-api-image
+docker build -t ros-rest-bridge .
+docker run --network="host" ros-rest-bridge

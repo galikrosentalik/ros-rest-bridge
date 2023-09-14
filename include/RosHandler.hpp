@@ -16,7 +16,7 @@
 class CallBackHandler
 {
 public:
-    CallBackHandler(const std::string& _topic = "", std::shared_ptr<ros::NodeHandle> _node = nullptr)
+    CallBackHandler(const std::string& _topic, std::shared_ptr<ros::NodeHandle> _node)
     : m_topic(_topic)
     {
         if(_node)
@@ -48,11 +48,12 @@ public:
 
 private:
     void SubscribeTopic(const std::string& _topic);
+
 private:
     std::mutex m_publishersMtx;
-    std::map<std::string, std::pair<ros::Publisher, std::mutex> > m_publishers;
+    std::map<std::string, std::pair<ros::Publisher, std::shared_ptr<std::mutex> > > m_publishers;
     std::mutex m_subscribersMtx;
-    std::map<std::string, CallBackHandler> m_subscribers;
+    std::map<std::string, std::shared_ptr<CallBackHandler> > m_subscribers;
     std::shared_ptr<ros::NodeHandle> m_node;
 };
 

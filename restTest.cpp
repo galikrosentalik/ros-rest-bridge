@@ -21,10 +21,10 @@ int main()
     {
         // Get client details
         auto remote_address = message.remote_address();
-        
+
         // Convert the client's address (which is a narrow string) to a wide string
         std::wstring remote_address_wide(remote_address.begin(), remote_address.end());
-        
+
         // Print client details to std::wcout (wide string stream)
         std::wcout << L"Received GET request from IP: " << remote_address_wide << std::endl;
 

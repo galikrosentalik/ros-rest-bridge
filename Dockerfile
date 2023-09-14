@@ -27,4 +27,4 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash && \
 EXPOSE 8080
 
 # Start the ROS master, then your C++ application when the container starts
-CMD ["bash", "-c", "source /opt/ros/$ROS_DISTRO/setup.bash && roscore & ./build/main"]
+CMD ["bash", "-c", "source /opt/ros/$ROS_DISTRO/setup.bash && roscore & ./build/RosRestBridge"]
