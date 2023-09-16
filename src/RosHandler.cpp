@@ -40,13 +40,20 @@ geometry_msgs::Pose RosHandler::GetLatestMsg(const std::string& _topic)
     return m_subscribers[_topic]->GetLatestMsg();
 }
 
-void RosHandler::PublishTopic(const std::string& _topic, geometry_msgs::Pose _msg)
+void RosHandler::PublishTopic(const std::string& _topic, double _x, double _y, double _z)
 {
+    loggerUtility::writeLog(BWR_LOG_FATAL, "31");
     if(m_publishers.find(_topic) == m_publishers.end())
     {
         m_publishers[_topic] = std::make_pair<ros::Publisher, std::shared_ptr<std::mutex>>(m_node->advertise<geometry_msgs::Pose>(_topic, 1), std::make_shared<std::mutex>());
     }
+    loggerUtility::writeLog(BWR_LOG_FATAL, "32");
+    geometry_msgs::Pose msg;
+    msg.position.x = _x;
+    msg.position.y = _y;
+    msg.position.z = _z;
     m_publishers[_topic].second->lock();
-    m_publishers[_topic].first.publish(_msg);
+    m_publishers[_topic].first.publish(msg);
     m_publishers[_topic].second->unlock();
+    loggerUtility::writeLog(BWR_LOG_FATAL, "33");
 }

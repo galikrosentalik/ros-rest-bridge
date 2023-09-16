@@ -44,7 +44,7 @@ public:
     RosHandler();
     ~RosHandler();
     geometry_msgs::Pose GetLatestMsg(const std::string& _topic); //in case the topic is not subscirbed yet, will subscribe and block untill the topic is published
-    void PublishTopic(const std::string& _topic, geometry_msgs::Pose _msg);
+    void PublishTopic(const std::string& _topic, double _x, double _y, double _z);
 
 private:
     void SubscribeTopic(const std::string& _topic);

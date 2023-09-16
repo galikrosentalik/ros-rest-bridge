@@ -23,7 +23,8 @@ void RestHandler::handle_get(http_request message)
     json::value retValue;
     if (query_parameters.find("topic") != query_parameters.end())
     {
-//        retValue = m_manager->handle_get()
+        std::string topic = query_parameters["topic"];
+        retValue = m_manager->handle_get(topic);
     }
     else
     {
@@ -36,12 +37,39 @@ void RestHandler::handle_get(http_request message)
 
 void RestHandler::handle_post(http_request message)
 {
-//    m_manager->handle_post()
-    auto remote_address = message.remote_address();
-    std::cout << "Received POST request from IP: " << remote_address << std::endl;
-
+    loggerUtility::writeLog(BWR_LOG_FATAL, "1");
     json::value response;
-    response[U("message")] = json::value::string(U("Received POST request!"));
-
-    message.reply(status_codes::OK, response);
+    try
+    {
+        message.extract_json().then([=](json::value body)
+        {
+            std::string topic;
+            json::value data;
+            // Check if the "topic" and "data" fields are present
+            if (body.has_field("topic") && body.has_field("data"))
+            {
+                topic = utility::conversions::to_utf8string(body["topic"].as_string()); // Convert to std::string
+                data = body["data"];
+                //response = *(const_cast<json::value>(&body));
+                // Now you can work with the "topic" and "data" fields as std::string and json::value, respectively
+                std::cout << "Topic: " << topic << std::endl;
+                std::cout << "Data - x: " << data[U("x")].as_double() << ", y: " << data[U("y")].as_double() << ", z: " << data[U("z")].as_double() << std::endl;
+            }
+            else
+            {
+                // Handle the case where required fields are missing
+                // You may want to return an error response
+                // or take appropriate action based on your application logic
+                message.reply(status_codes::OK);
+            }
+            m_manager->handle_post(topic, data);
+            // Now you can use the 'topic' variable as a std::string
+        });
+        message.reply(status_codes::OK, response);
+    }
+    catch(...)
+    {
+        loggerUtility::writeLog(BWR_LOG_WARN, "RestHandler::handle_post(), EXCEPTION CAUGHT");
+    }
+    loggerUtility::writeLog(BWR_LOG_FATAL, "3");
 }

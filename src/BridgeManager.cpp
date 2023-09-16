@@ -7,7 +7,7 @@ BridgeManager::BridgeManager()
 {
     loggerUtility::writeLog(BWR_LOG_DEBUG, "BridgeManager::BridgeManager()");
     m_rosHandler = std::make_shared<RosHandler>();
-    m_restHandler = std::make_shared<RestHandler>("http://localhost:8080/api/hello", this);
+    m_restHandler = std::make_shared<RestHandler>("http://localhost:8080/RosBridge", this);
 }
 
 BridgeManager::~BridgeManager(){}
@@ -29,20 +29,38 @@ json::value BridgeManager::handle_get(const std::string& _topic)
 void BridgeManager::handle_post(const std::string _topic, const json::value& _body)
 {
     ++m_numOfPostMsgs;
-    geometry_msgs::Pose pose;
+    double x, y, z;
+    std::cout << _topic << std::endl;
+    std::cout << _body << std::endl;
     if (_body.has_field("x"))
     {
-        pose.position.x = _body.get("x").as_double();
+        x = _body.get("x").as_double();
+    }
+    else
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "BridgeManager::handle_post(), MISSING FIELD, X");
+        return;
     }
     if (_body.has_field("y"))
     {
-        pose.position.x = _body.get("y").as_double();
+        x = _body.get("y").as_double();
+    }
+    else
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "BridgeManager::handle_post(), MISSING FIELD, Y");
+        return;
     }
     if (_body.has_field("z"))
     {
-        pose.position.x = _body.get("z").as_double();
+        x = _body.get("z").as_double();
     }
-    m_rosHandler->PublishTopic(_topic, pose);
+    else
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "BridgeManager::handle_post(), MISSING FIELD, Z");
+        return;
+    }
+    loggerUtility::writeLog(BWR_LOG_FATAL, "22");
+    m_rosHandler->PublishTopic(_topic, x, y, z);
 }
 
 void BridgeManager::Routine()
