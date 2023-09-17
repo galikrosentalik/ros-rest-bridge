@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}
                ./src/BridgeManager.cpp
                ./src/RestHandler.cpp
                ./src/RosHandler.cpp
+               ./src/MainFrame.cpp
         )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE cpprestsdk::cpprest ${catkin_LIBRARIES})

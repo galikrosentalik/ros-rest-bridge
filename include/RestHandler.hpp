@@ -24,8 +24,8 @@ public:
     ~RestHandler();
 
 private:
-    void handle_get(http_request message);
-    void handle_post(http_request message);
+    void HandleGet(http_request message);
+    void HandlePost(http_request message);
 
 private:
     std::shared_ptr<http_listener> m_listener;

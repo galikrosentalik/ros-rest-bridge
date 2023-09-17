@@ -20,6 +20,7 @@ RosHandler::RosHandler()
 
 RosHandler::~RosHandler()
 {
+    loggerUtility::writeLog(BWR_LOG_FATAL, "RosHandler::~RosHandler()");
     m_trd->join();
 }
 

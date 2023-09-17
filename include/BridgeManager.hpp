@@ -13,9 +13,8 @@ public:
     BridgeManager();
     ~BridgeManager();
     void Routine();
-    json::value handle_get(const std::string& _topic);
-    void handle_post(const std::string _topic, json::value& _message);
-private:
+    json::value HandleGet(const std::string& _topic);
+    void HandlePost(const std::string _topic, json::value& _message);
 
 private:
     std::shared_ptr<RosHandler> m_rosHandler;
