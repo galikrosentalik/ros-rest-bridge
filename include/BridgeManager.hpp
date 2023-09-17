@@ -14,7 +14,7 @@ public:
     ~BridgeManager();
     void Routine();
     json::value handle_get(const std::string& _topic);
-    void handle_post(const std::string _topic, const json::value& _message);
+    void handle_post(const std::string _topic, json::value& _message);
 private:
 
 private:

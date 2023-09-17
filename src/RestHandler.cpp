@@ -37,7 +37,6 @@ void RestHandler::handle_get(http_request message)
 
 void RestHandler::handle_post(http_request message)
 {
-    loggerUtility::writeLog(BWR_LOG_FATAL, "1");
     json::value response;
     try
     {
@@ -45,31 +44,23 @@ void RestHandler::handle_post(http_request message)
         {
             std::string topic;
             json::value data;
-            // Check if the "topic" and "data" fields are present
             if (body.has_field("topic") && body.has_field("data"))
             {
-                topic = utility::conversions::to_utf8string(body["topic"].as_string()); // Convert to std::string
+                topic = body["topic"].as_string();
                 data = body["data"];
-                //response = *(const_cast<json::value>(&body));
-                // Now you can work with the "topic" and "data" fields as std::string and json::value, respectively
-                std::cout << "Topic: " << topic << std::endl;
-                std::cout << "Data - x: " << data[U("x")].as_double() << ", y: " << data[U("y")].as_double() << ", z: " << data[U("z")].as_double() << std::endl;
+                m_manager->handle_post(topic, data);
+                message.reply(status_codes::OK, body);
             }
             else
             {
-                // Handle the case where required fields are missing
-                // You may want to return an error response
-                // or take appropriate action based on your application logic
-                message.reply(status_codes::OK);
+                loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::handle_post(), BED POST REQUEST, MISSING TOPIC OR DATA");
+                message.reply(status_codes::BadRequest);
             }
-            m_manager->handle_post(topic, data);
-            // Now you can use the 'topic' variable as a std::string
         });
-        message.reply(status_codes::OK, response);
     }
     catch(...)
     {
-        loggerUtility::writeLog(BWR_LOG_WARN, "RestHandler::handle_post(), EXCEPTION CAUGHT");
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::handle_post(), EXCEPTION CAUGHT");
+        message.reply(status_codes::InternalError);
     }
-    loggerUtility::writeLog(BWR_LOG_FATAL, "3");
 }

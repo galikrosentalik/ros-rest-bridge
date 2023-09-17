@@ -9,9 +9,11 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <thread>
 
 #include "ros/ros.h"
 #include <geometry_msgs/Pose.h>
+#include <cpprest/json.h>
 
 class CallBackHandler
 {
@@ -43,10 +45,11 @@ class RosHandler
 public:
     RosHandler();
     ~RosHandler();
-    geometry_msgs::Pose GetLatestMsg(const std::string& _topic); //in case the topic is not subscirbed yet, will subscribe and block untill the topic is published
+    web::json::value GetLatestMsg(const std::string& _topic); //in case the topic is not subscirbed yet, will subscribe and block untill the topic is published
     void PublishTopic(const std::string& _topic, double _x, double _y, double _z);
 
 private:
+    void Routine();
     void SubscribeTopic(const std::string& _topic);
 
 private:
@@ -55,6 +58,7 @@ private:
     std::mutex m_subscribersMtx;
     std::map<std::string, std::shared_ptr<CallBackHandler> > m_subscribers;
     std::shared_ptr<ros::NodeHandle> m_node;
+    std::shared_ptr<std::thread> m_trd;
 };
 
 #endif //ROS_HANDLER_HPP
