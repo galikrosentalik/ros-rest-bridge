@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy your C++ source code into the container
-COPY restTest.cpp /app/
 COPY CMakeLists.txt /app/
 COPY src/* /app/src/
 COPY include/* /app/include/
