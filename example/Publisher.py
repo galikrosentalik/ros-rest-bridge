@@ -32,7 +32,8 @@ def routine():
             topic = random.choice(topics)
             curl_command = generate_random_command(topic)
             subprocess.run(curl_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-            print(curl_command[6])
+            clock_format = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+            print(clock_format + "  " + curl_command[6])
         except subprocess.CalledProcessError as e:
             print(e.stderr)
 

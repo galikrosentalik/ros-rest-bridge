@@ -7,7 +7,7 @@ RosHandler::RosHandler()
 {
     loggerUtility::writeLog(BWR_LOG_DEBUG, "RosHandler::RosHandler()");
     static int dummy;
-    std::string name = "RestBridge";
+    std::string name = "ros_rest_relay";
     ros::init(dummy, nullptr, name);
     m_node = std::make_shared<ros::NodeHandle>();
     loggerUtility::writeLog(BWR_LOG_DEBUG, "RosHandler::RosHandler(), ROS INIT DONE");

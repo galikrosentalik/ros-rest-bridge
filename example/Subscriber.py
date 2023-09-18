@@ -15,7 +15,8 @@ def routine():
             try:
                 result = subprocess.run(data["curl-command"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
                 if result.stdout != data["last-data"]:
-                    print(result.stdout)
+                    clock_format = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+                    print(clock_format + "  " + result.stdout)
                     data["last-data"] = result.stdout
             except subprocess.CalledProcessError as e:
                 print(e.stderr)
