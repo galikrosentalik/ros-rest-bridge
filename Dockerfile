@@ -6,6 +6,7 @@ FROM ros:noetic
 RUN apt-get update && apt-get install -y \
     g++ \
     cmake \
+    curl \
     libcpprest-dev
 
 # Create a directory for your C++ application
@@ -15,6 +16,7 @@ WORKDIR /app
 COPY CMakeLists.txt /app/
 COPY src/* /app/src/
 COPY include/* /app/include/
+COPY example/* /app/example/
 
 # Set the shell to Bash and source ROS setup.bash before running CMake
 SHELL ["/bin/bash", "-c"]
