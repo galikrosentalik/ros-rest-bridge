@@ -26,39 +26,33 @@ json::value BridgeManager::HandleGet(const std::string& _topic)
     return retValue;
 }
 
+bool BridgeManager::CheckFieldExistInBody(const std::string& _field, json::value& _body)
+{
+    if (_body.has_field(_field))
+    {
+        return true;
+    }
+    else
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "BridgeManager::CheckFieldExistInBody(), MISSING FIELD, %s", _field.c_str());
+        return false;
+    }
+}
+
 void BridgeManager::HandlePost(const std::string _topic, json::value& _body)
 {
     ++m_numOfPostMsgs;
     double x, y, z;
     try
     {
-
-        if (_body.has_field("x"))
+        if(CheckFieldExistInBody("x", _body) && CheckFieldExistInBody("y", _body) && CheckFieldExistInBody("z", _body))
         {
-
             x = _body["x"].as_number().to_double();
-        }
-        else
-        {
-            loggerUtility::writeLog(BWR_LOG_ERROR, "BridgeManager::HandlePost(), MISSING FIELD, X");
-            return;
-        }
-        if (_body.has_field("y"))
-        {
             y = _body["y"].as_number().to_double();
-        }
-        else
-        {
-            loggerUtility::writeLog(BWR_LOG_ERROR, "BridgeManager::HandlePost(), MISSING FIELD, Y");
-            return;
-        }
-        if (_body.has_field("z"))
-        {
             z = _body["z"].as_number().to_double();
         }
         else
         {
-            loggerUtility::writeLog(BWR_LOG_ERROR, "BridgeManager::HandlePost(), MISSING FIELD, Z");
             return;
         }
     }

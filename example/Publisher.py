@@ -27,7 +27,7 @@ def routine():
     for i in range(1, num_args):
         topics.append(sys.argv[i])
     while True:
-        time.sleep(3)
+        time.sleep(2)
         try:
             topic = random.choice(topics)
             curl_command = generate_random_command(topic)

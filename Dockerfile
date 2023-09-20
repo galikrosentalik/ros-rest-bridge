@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     cmake \
     curl \
+    nano \
     libcpprest-dev
 
 # Create a directory for your C++ application

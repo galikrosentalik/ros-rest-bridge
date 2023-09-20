@@ -17,6 +17,9 @@ public:
     void HandlePost(const std::string _topic, json::value& _message);
 
 private:
+    bool CheckFieldExistInBody(const std::string& _field, json::value& _body);
+
+private:
     std::shared_ptr<RosHandler> m_rosHandler;
     std::shared_ptr<RestHandler> m_restHandler;
     int m_numOfPostMsgs;

@@ -39,48 +39,51 @@ RestHandler::~RestHandler()
 
 void RestHandler::HandleGet(http_request message)
 {
+    json::value retValue;
+    status_code code = status_codes::OK;
     try
     {
         auto query_parameters = uri::split_query(message.request_uri().query());
-        json::value retValue;
         if (query_parameters.find("topic") != query_parameters.end())
         {
             std::string topic = query_parameters["topic"];
-            retValue = m_manager->HandleGet(topic);
+            retValue["data"] = m_manager->HandleGet(topic);
         }
         else
         {
             loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandleGet(), GET REQUEST IS MISSING TOPIC");
-            message.reply(status_codes::BadRequest);
+            retValue["data"] = json::value("Missing Topic");
+            code = status_codes::BadRequest;
         }
-        json::value response;
-        response["data"] = retValue;
-        message.reply(status_codes::OK, response);
     }
     catch (const web::http::http_exception& e)
     {
         loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandleGet(), HTTP EXCEPTION: %s", e.what());
-        message.reply(status_codes::InternalError);
+        retValue["data"] = json::value("InternalError");
+        code = status_codes::InternalError;
     }
     catch (const web::uri_exception& e)
     {
         loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandleGet(), URI EXCEPTION: %s", e.what());
-        message.reply(status_codes::InternalError);
+        retValue["data"] = json::value("InternalError");
+        code = status_codes::InternalError;
     }
     catch (...)
     {
         loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandleGet(), AN UNKNOWN EXCEPTION OCCURRED");
-        message.reply(status_codes::InternalError);
+        retValue["data"] = json::value("InternalError");
+        code = status_codes::InternalError;
     }
+    message.reply(code, retValue);
 }
 
 void RestHandler::HandlePost(http_request message)
 {
-    json::value response;
     try
     {
         message.extract_json().then([=](json::value body)
         {
+            status_code code = status_codes::OK;
             std::string topic;
             json::value data;
             if (body.has_field("topic") && body.has_field("data"))
@@ -88,28 +91,29 @@ void RestHandler::HandlePost(http_request message)
                 topic = body["topic"].as_string();
                 data = body["data"];
                 m_manager->HandlePost(topic, data);
-                message.reply(status_codes::OK, body);
             }
             else
             {
                 loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandlePost(), BED POST REQUEST, MISSING TOPIC OR DATA");
-                message.reply(status_codes::BadRequest);
+                body["data"] = json::value("BadRequest");
+                code = status_codes::BadRequest;
             }
+            message.reply(code, body);
         });
     }
     catch (const web::http::http_exception& e)
     {
         loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandlePost(), HTTP EXCEPTION: %s", e.what());
-        message.reply(status_codes::InternalError);
+        message.reply(status_codes::InternalError, json::value("InternalError"));
     }
     catch (const web::uri_exception& e)
     {
         loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandlePost(), URI EXCEPTION: %s", e.what());
-        message.reply(status_codes::InternalError);
+        message.reply(status_codes::InternalError, json::value("InternalError"));
     }
     catch(...)
     {
         loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandlePost(), AN UNKNOWN EXCEPTION OCCURRED");
-        message.reply(status_codes::InternalError);
+        message.reply(status_codes::InternalError, json::value("InternalError"));
     }
 }
