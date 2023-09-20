@@ -1,16 +1,35 @@
 
 #include "BridgeManager.hpp"
 #include "RestHandler.hpp"
+#include "MainFrame.hpp"
 #include "Logger.hpp"
 
 RestHandler::RestHandler(const std::string& _url, BridgeManager* _manager)
 : m_manager(_manager)
 {
     loggerUtility::writeLog(BWR_LOG_DEBUG, "RestHandler::RestHandler()");
-    m_listener = std::make_shared<http_listener>(_url);
-    m_listener->support(methods::GET, std::bind(&RestHandler::HandleGet, this, std::placeholders::_1));
-    m_listener->support(methods::POST, std::bind(&RestHandler::HandlePost, this, std::placeholders::_1));
-    m_listener->open().wait();
+    try
+    {
+        m_listener = std::make_shared<http_listener>(_url);
+        m_listener->support(methods::GET, std::bind(&RestHandler::HandleGet, this, std::placeholders::_1));
+        m_listener->support(methods::POST, std::bind(&RestHandler::HandlePost, this, std::placeholders::_1));
+        m_listener->open().wait();
+    }
+    catch (const web::http::http_exception& e)
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::RestHandler(), HTTP EXCEPTION: %s", e.what());
+        EndOfWorldAnnouncer::AnnounceToAllEndOfWorldArrive();
+    }
+    catch (const web::uri_exception& e)
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::RestHandler(), URI EXCEPTION: %s", e.what());
+        EndOfWorldAnnouncer::AnnounceToAllEndOfWorldArrive();
+    }
+    catch (...)
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::RestHandler(), AN UNKNOWN EXCEPTION OCCURRED");
+        EndOfWorldAnnouncer::AnnounceToAllEndOfWorldArrive();
+    }
 }
 
 RestHandler::~RestHandler()
@@ -20,20 +39,39 @@ RestHandler::~RestHandler()
 
 void RestHandler::HandleGet(http_request message)
 {
-    auto query_parameters = uri::split_query(message.request_uri().query());
-    json::value retValue;
-    if (query_parameters.find("topic") != query_parameters.end())
+    try
     {
-        std::string topic = query_parameters["topic"];
-        retValue = m_manager->HandleGet(topic);
+        auto query_parameters = uri::split_query(message.request_uri().query());
+        json::value retValue;
+        if (query_parameters.find("topic") != query_parameters.end())
+        {
+            std::string topic = query_parameters["topic"];
+            retValue = m_manager->HandleGet(topic);
+        }
+        else
+        {
+            loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandleGet(), GET REQUEST IS MISSING TOPIC");
+            message.reply(status_codes::BadRequest);
+        }
+        json::value response;
+        response["data"] = retValue;
+        message.reply(status_codes::OK, response);
     }
-    else
+    catch (const web::http::http_exception& e)
     {
-        loggerUtility::writeLog(BWR_LOG_WARN, "RestHandler::HandleGet(), GET REQUEST IS MISSING TOPIC");
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandleGet(), HTTP EXCEPTION: %s", e.what());
+        message.reply(status_codes::InternalError);
     }
-    json::value response;
-    response["data"] = retValue;
-    message.reply(status_codes::OK, response);
+    catch (const web::uri_exception& e)
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandleGet(), URI EXCEPTION: %s", e.what());
+        message.reply(status_codes::InternalError);
+    }
+    catch (...)
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandleGet(), AN UNKNOWN EXCEPTION OCCURRED");
+        message.reply(status_codes::InternalError);
+    }
 }
 
 void RestHandler::HandlePost(http_request message)
@@ -59,9 +97,19 @@ void RestHandler::HandlePost(http_request message)
             }
         });
     }
+    catch (const web::http::http_exception& e)
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandlePost(), HTTP EXCEPTION: %s", e.what());
+        message.reply(status_codes::InternalError);
+    }
+    catch (const web::uri_exception& e)
+    {
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandlePost(), URI EXCEPTION: %s", e.what());
+        message.reply(status_codes::InternalError);
+    }
     catch(...)
     {
-        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandlePost(), EXCEPTION CAUGHT");
+        loggerUtility::writeLog(BWR_LOG_ERROR, "RestHandler::HandlePost(), AN UNKNOWN EXCEPTION OCCURRED");
         message.reply(status_codes::InternalError);
     }
 }

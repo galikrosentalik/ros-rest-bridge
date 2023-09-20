@@ -21,10 +21,10 @@ public:
     CallBackHandler(const std::string& _topic, std::shared_ptr<ros::NodeHandle> _node)
     : m_topic(_topic)
     {
-        if(_node)
-        {
-            m_subscriber = _node->subscribe(m_topic, 10, &CallBackHandler::CallBack, this, ros::TransportHints().tcpNoDelay(true));
-        }
+        m_subscriber = _node->subscribe(m_topic, 10, &CallBackHandler::CallBack, this, ros::TransportHints().tcpNoDelay(true));
+        m_lastMsg.position.x = std::numeric_limits<double>::quiet_NaN();
+        m_lastMsg.position.y = std::numeric_limits<double>::quiet_NaN();
+        m_lastMsg.position.z = std::numeric_limits<double>::quiet_NaN();
     }
     geometry_msgs::Pose GetLatestMsg() { return m_lastMsg; }
 
