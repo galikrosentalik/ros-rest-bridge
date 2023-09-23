@@ -1,7 +1,6 @@
 # Use the official ROS Noetic base image
 FROM ros:noetic
 
-
 # Install additional dependencies for your C++ application
 RUN apt-get update && apt-get install -y \
     g++ \
@@ -19,14 +18,22 @@ COPY src/* /app/src/
 COPY include/* /app/include/
 COPY example/* /app/example/
 
-# Set the shell to Bash and source ROS setup.bash before running CMake
 SHELL ["/bin/bash", "-c"]
 
-RUN source /opt/ros/$ROS_DISTRO/setup.bash && \
-    mkdir build && cd build && cmake .. && make
+# Create a catkin workspace, initialize and configure the ROS package
+RUN mkdir -p ~/catkin_ws/src && \
+    cd ~/catkin_ws/src && \
+    source /opt/ros/$ROS_DISTRO/setup.bash && catkin_init_workspace && \
+    catkin_create_pkg ros_rest_interface roscpp std_msgs
+
+# Copy the contents of /app to the ROS package directory
+RUN cp -r /app/* ~/catkin_ws/src/ros_rest_interface/
+
+# Build the ROS package
+RUN cd ~/catkin_ws/ && source /opt/ros/$ROS_DISTRO/setup.bash && catkin_make
 
 # Expose the port your application will listen on
 EXPOSE 8080
 
-# Start the ROS master, then your C++ application when the container starts
-CMD ["bash", "-c", "source /opt/ros/$ROS_DISTRO/setup.bash && roscore & ./build/RosRestBridge"]
+CMD ["/bin/bash", "-ilc", "source ~/catkin_ws/devel/setup.bash && roscore & \
+      sleep 1 && source ~/catkin_ws/devel/setup.bash && rosrun ros_rest_interface ros_rest_interface"]
