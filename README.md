@@ -3,7 +3,7 @@
 * ```docker build -t ros-rest-bridge .```
 
 **Running Docker image**
-* ```docker run --network="host" -e "LOG_TO_CONSOLE=true" ros-rest-bridge```
+* ```docker run -p 8080:8080 -e "LOG_TO_CONSOLE=true" ros-rest-bridge```
 
 # Testing the bridge
 **In order to test with automated python scripts**

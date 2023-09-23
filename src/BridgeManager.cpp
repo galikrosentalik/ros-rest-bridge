@@ -8,7 +8,7 @@ BridgeManager::BridgeManager()
 {
     loggerUtility::writeLog(BWR_LOG_DEBUG, "BridgeManager::BridgeManager()");
     m_rosHandler = std::make_shared<RosHandler>();
-    m_restHandler = std::make_shared<RestHandler>("http://localhost:8080/RosBridge", this);
+    m_restHandler = std::make_shared<RestHandler>("http://0.0.0.0:8080/RosBridge", this);
 }
 
 BridgeManager::~BridgeManager()
