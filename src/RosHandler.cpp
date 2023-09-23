@@ -37,6 +37,7 @@ RosHandler::RosHandler()
 RosHandler::~RosHandler()
 {
     loggerUtility::writeLog(BWR_LOG_FATAL, "RosHandler::~RosHandler()");
+    ros::shutdown();
     m_trd->join();
 }
 
