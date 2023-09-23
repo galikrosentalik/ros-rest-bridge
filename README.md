@@ -16,6 +16,12 @@
   * ```python3 example/Publisher.py topic_a topic_b```
     * Topics to Publish need to be added to the command
     * Will randomly generate msgs to topics
+  * ```source /opt/ros/$ROS_DISTRO/setup.bash && python3 example/Publish_to_ros.py```
+    * Will create a ROS publisher, will publish directly to ROS, not through the bridge
+    * Will publish in 5 FPS random msg to first_topic
+
+
+
 
 **The package can be tested manually using the browsers GET & POST commands**
 

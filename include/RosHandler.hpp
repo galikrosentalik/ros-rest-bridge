@@ -51,6 +51,7 @@ public:
 private:
     void Routine();
     void SubscribeTopic(const std::string& _topic);
+    bool CreateNewPublisher(const std::string& _topic);
 
 private:
     std::mutex m_publishersMtx;

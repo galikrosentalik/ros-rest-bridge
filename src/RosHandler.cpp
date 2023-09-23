@@ -63,7 +63,7 @@ void RosHandler::Routine()
 
 void RosHandler::SubscribeTopic(const std::string& _topic)
 {
-    m_subscribersMtx.lock();
+    std::lock_guard<std::mutex> lck(m_subscribersMtx);
     if(m_subscribers.find(_topic) == m_subscribers.end())
     {
         loggerUtility::writeLog(BWR_LOG_INFO, "RosHandler::SubscribeTopic(), SUBSCRIBING TO NEW TOPIC, %s", _topic.c_str());
@@ -80,7 +80,6 @@ void RosHandler::SubscribeTopic(const std::string& _topic)
             loggerUtility::writeLog(BWR_LOG_ERROR, "RosHandler::SubscribeTopic(), AN UNKNOWN EXCEPTION OCCURRED");
         }
     }
-    m_subscribersMtx.unlock();
 }
 
 web::json::value RosHandler::GetLatestMsg(const std::string& _topic)
@@ -108,12 +107,39 @@ web::json::value RosHandler::GetLatestMsg(const std::string& _topic)
     return retValue;
 }
 
+bool RosHandler::CreateNewPublisher(const std::string& _topic)
+{
+    bool success = true;
+    std::lock_guard<std::mutex> lck(m_publishersMtx);
+    if(m_publishers.find(_topic) == m_publishers.end())
+    {
+        try
+        {
+            loggerUtility::writeLog(BWR_LOG_INFO, "RosHandler::CreateNewPublisher(), CREATING NEW PUBLISHER, %s", _topic.c_str());
+            m_publishers[_topic] = std::make_pair<ros::Publisher, std::shared_ptr<std::mutex>>(m_node->advertise<geometry_msgs::Pose>(_topic, 1), std::make_shared<std::mutex>());
+        }
+        catch (const ros::Exception& e)
+        {
+            success = false;
+            loggerUtility::writeLog(BWR_LOG_ERROR, "RosHandler::CreateNewPublisher(), ROS EXCEPTION: %s", e.what());
+        }
+        catch (...)
+        {
+            success = false;
+            loggerUtility::writeLog(BWR_LOG_ERROR, "RosHandler::CreateNewPublisher(), AN UNKNOWN EXCEPTION OCCURRED");
+        }
+    }
+    return success;
+}
+
 void RosHandler::PublishTopic(const std::string& _topic, double _x, double _y, double _z)
 {
     if(m_publishers.find(_topic) == m_publishers.end())
     {
-        loggerUtility::writeLog(BWR_LOG_INFO, "RosHandler::PublishTopic(), CREATING NEW PUBLISHER, %s", _topic.c_str());
-        m_publishers[_topic] = std::make_pair<ros::Publisher, std::shared_ptr<std::mutex>>(m_node->advertise<geometry_msgs::Pose>(_topic, 1), std::make_shared<std::mutex>());
+        if(!CreateNewPublisher(_topic))
+        {
+            return;
+        }
     }
     try
     {
